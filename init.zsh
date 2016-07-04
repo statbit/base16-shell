@@ -26,8 +26,7 @@ color() {
       echo "$BACKGROUND" >> "$BASE16_CONFIG"
       "$FILE"
     else
-      echo "Scheme '$SCHEME' not found in $BASE16_DIR"
-      return 1
+      color $SCHEME
     fi
     ;;
   help)
@@ -35,15 +34,23 @@ color() {
     echo 'color light [grayscale|harmonic16|ocean|tomorrow|twilight|...]'
     echo
     echo 'Available schemes:'
-    find ~/.zsh/base16-shell -name 'base16-*.sh' | \
+    find $BASE16_DIR -name 'base16-*.sh' | \
       sed -E 's|.+/base16-||' | \
       sed -E 's/\.(dark|light)\.sh/ (\1)/' | \
       column
       ;;
 
   *)
-    echo 'Unknown subcommand: use one of {dark,light,help}'
-    ;;
+    SCHEME=$BACKGROUND
+    FILE="$BASE16_DIR/base16-$SCHEME.sh"
+    if [[ -x "$FILE" ]]; then
+      echo "$SCHEME" >! "$BASE16_CONFIG"
+      echo "dark" >> "$BASE16_CONFIG"
+      "$FILE"
+    else
+      echo "Scheme '$SCHEME' not found in $BASE16_DIR (looking for file $FILE)"
+      return 1
+    fi
   esac
 
 }
@@ -59,13 +66,7 @@ light() {
 if [[ -s "$BASE16_CONFIG" ]]; then
   SCHEME=$(head -1 "$BASE16_CONFIG")
   BACKGROUND=$(sed -n -e '2 p' "$BASE16_CONFIG")
-  if [ "$BACKGROUND" = 'dark' ]; then
-    dark "$SCHEME"
-  elif [ "$BACKGROUND" = 'light' ]; then
-    light "$SCHEME"
-  else
-    echo "error: unknown background type in $BASE16_CONFIG"
-  fi
+  color $SCHEME $BACKGROUND
 else
   # Default.
   dark tomorrow
