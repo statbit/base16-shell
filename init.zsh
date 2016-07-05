@@ -66,7 +66,7 @@ light() {
 if [[ -s "$BASE16_CONFIG" ]]; then
   SCHEME=$(head -1 "$BASE16_CONFIG")
   BACKGROUND=$(sed -n -e '2 p' "$BASE16_CONFIG")
-  color $SCHEME $BACKGROUND
+  color $BACKGROUND $SCHEME
 else
   # Default.
   dark tomorrow
